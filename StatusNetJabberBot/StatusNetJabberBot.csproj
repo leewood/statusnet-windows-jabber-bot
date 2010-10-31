@@ -47,6 +47,7 @@
     <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatusNetJabberBotService.cs">
       <SubType>Component</SubType>
     </Compile>
