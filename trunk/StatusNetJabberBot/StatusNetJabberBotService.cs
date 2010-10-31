@@ -76,7 +76,7 @@ namespace StatusNetJabberBot
             _xmppCon.Server = jid.Server;
             _xmppCon.AutoAgents = true;
             _xmppCon.AutoPresence = true;
-            
+            _xmppCon.KeepAlive = true;
             _xmppCon.AutoRoster = true;
             _xmppCon.AutoResolveConnectServer = true;
 
@@ -84,6 +84,10 @@ namespace StatusNetJabberBot
             _xmppCon.OnMessage += new MessageHandler(xmppCon_OnMessage);
             _xmppCon.OnLogin += new ObjectHandler(xmppCon_OnLogin);
             _xmppCon.OnError +=new ErrorHandler(xmppCon_OnError);
+            _xmppCon.OnSocketError += new ErrorHandler(xmppCon_OnError);
+            _xmppCon.OnClose += new ObjectHandler(_xmppCon_OnClose);
+
+            _xmppCon.OnXmppConnectionStateChanged += new XmppConnectionStateHandler(_xmppCon_OnXmppConnectionStateChanged);
             _xmppCon.Open();
 
             Wait("");
@@ -91,6 +95,16 @@ namespace StatusNetJabberBot
             _timer = new Timer();
             _timer.Interval = 2000;
             _timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+        }
+
+        void _xmppCon_OnClose(object sender)
+        {
+            this.EventLog.WriteEntry("Closed");
+        }
+
+        void _xmppCon_OnXmppConnectionStateChanged(object sender, XmppConnectionState state)
+        {
+            this.EventLog.WriteEntry("Status changed : " + state.ToString());
         }
 
         void timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -161,6 +175,7 @@ namespace StatusNetJabberBot
 
         void xmppCon_OnError(object sender, Exception ex)
         {
+            this.EventLog.WriteEntry("Error: " + ex.Message);
         }
 
         void xmppCon_OnMessage(object sender, Message msg)
