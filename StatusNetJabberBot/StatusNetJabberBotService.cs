@@ -17,6 +17,7 @@ namespace StatusNetJabberBot
         private XmppClientConnection _xmppCon;
         private bool _bWait;
         private System.Timers.Timer _timer;
+        private bool _bQuit = false;
 
         // configuration variables
         private string _phpPath;
@@ -64,6 +65,11 @@ namespace StatusNetJabberBot
         {
             base.OnStart(args);
 
+            init();
+        }
+
+        private void init()
+        {
             readConfig();
 
             _xmppCon = new XmppClientConnection();
@@ -83,7 +89,7 @@ namespace StatusNetJabberBot
             _xmppCon.OnPresence += new PresenceHandler(xmppCon_OnPresence);
             _xmppCon.OnMessage += new MessageHandler(xmppCon_OnMessage);
             _xmppCon.OnLogin += new ObjectHandler(xmppCon_OnLogin);
-            _xmppCon.OnError +=new ErrorHandler(xmppCon_OnError);
+            _xmppCon.OnError += new ErrorHandler(xmppCon_OnError);
             _xmppCon.OnSocketError += new ErrorHandler(xmppCon_OnError);
             _xmppCon.OnClose += new ObjectHandler(_xmppCon_OnClose);
 
@@ -95,11 +101,18 @@ namespace StatusNetJabberBot
             _timer = new Timer();
             _timer.Interval = 2000;
             _timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+
         }
 
         void _xmppCon_OnClose(object sender)
         {
             this.EventLog.WriteEntry("Closed");
+
+            // try to reconnect
+            if (!_bQuit)
+            {
+                init();
+            }
         }
 
         void _xmppCon_OnXmppConnectionStateChanged(object sender, XmppConnectionState state)
@@ -193,6 +206,8 @@ namespace StatusNetJabberBot
         protected override void OnStop()
         {
             base.OnStop();
+
+            _bQuit = true;
 
             _xmppCon.Close();
         }
