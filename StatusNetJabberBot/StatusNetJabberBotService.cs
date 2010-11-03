@@ -146,7 +146,7 @@ namespace StatusNetJabberBot
 
             p.WaitForExit();
 
-            this.EventLog.WriteEntry(output);
+            this.EventLog.WriteEntry("Output" + output);
 
             // reencode
             chars = Encoding.Convert(Encoding.GetEncoding(_statusNetEncoding), Encoding.GetEncoding(_windowsEncoding), Encoding.GetEncoding(_windowsEncoding).GetBytes(output));
@@ -193,7 +193,7 @@ namespace StatusNetJabberBot
 
         void xmppCon_OnMessage(object sender, Message msg)
         {
-            if (msg.Body != null)
+            if (msg.Body != null && msg.Body.Length > 0)
             {
                 this.EventLog.WriteEntry(msg.Body);
                 //queue.Add(msg.From.Bare, msg.Body);
